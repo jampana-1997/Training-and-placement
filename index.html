@@ -568,66 +568,29 @@ Total Placed Students :
 
 <script>
 
-/* CSV URL */
+const csvURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSlQ0WjFcZaI2eiKVtAqynVqs3H82MznXaV15n-qLjsDv6QL75g_7sQAhm0n6ZtiiDVKIB0MkuTNQ64/pub?output=csv";
 
-const csvURL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSlQ0WjFcZaI2eiKVtAqynVqs3H82MznXaV15n-qLjsDv6QL75g_7sQAhm0n6ZtiiDVKIB0MkuTNQ64/pub?gid=492329818&single=true&output=csv";
-
-let allData=[];
-
-let natureKey="";
-let internKey="";
-
-/* LOAD CSV */
-
-Papa.parse(csvURL,{
-
-download:true,
-
-header:true,
-
-skipEmptyLines:true,
-
-complete:function(results){
-
-allData = results.data.filter(
-row => Object.values(row).join("").trim() !== ""
-);
-
-if(allData.length===0){
-
-alert("No Data Found");
-
-return;
-
-}
-
-let headers = Object.keys(allData[0]);
-
-natureKey = headers.find(
-h => h.toLowerCase().includes("nature")
-);
-
-internKey = headers.find(
-h => h.toLowerCase().includes("paid")
-);
-
-buildTable(allData);
-
-populateFilters(allData);
-
-updateStats(allData);
-
-},
-
-error:function(err){
-
-console.log(err);
-
-alert("CSV Loading Failed");
-
-}
-
-});
+fetch(csvURL)
+  .then(res => {
+    if (!res.ok) throw new Error(res.status);
+    return res.text();
+  })
+  .then(csv => {
+    Papa.parse(csv, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        allData = results.data;
+        buildTable(allData);
+        populateFilters(allData);
+        updateStats(allData);
+      }
+    });
+  })
+  .catch(err => {
+    console.error(err);
+    alert("CSV Loading Failed: " + err);
+  });
 
 /* BUILD TABLE */
 
