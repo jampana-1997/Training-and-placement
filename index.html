@@ -1213,14 +1213,12 @@ function exportFilteredData(){
 
         let campusValue="";
 
-        Object.keys(row).forEach(key=>{
+                });
+Object.keys(row).forEach(key=>{
 
             if(key.includes("On Campus")){
                 campusValue=row[key]||"";
             }
-
-        });
-
         campusValue=campusValue.trim();
 
         return text.includes(search)
@@ -1315,9 +1313,17 @@ document.getElementById("resetFilters").addEventListener("click", function () {
     document.getElementById("campusFilter").value = "";
     document.getElementById("salaryFilter").value = "";
 
-    buildTable(allData);
-    populateFilters(allData);
-    updateStats(allData);
+    document.getElementById("search").value="";
+document.getElementById("batchFilter").value="";
+document.getElementById("branchFilter").value="";
+document.getElementById("companyFilter").value="";
+document.getElementById("natureFilter").value="";
+document.getElementById("internFilter").value="";
+document.getElementById("genderFilter").value="";
+document.getElementById("campusFilter").value="";
+document.getElementById("salaryFilter").value="";
+
+applyFilters();
 
 });
 </script>
