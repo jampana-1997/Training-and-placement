@@ -751,6 +751,8 @@ Reset
 <script>
 
 let allData = [];
+ let sortColumn = "";
+let sortDirection = "asc";
 const natureKey = "Nature of \nthe Company";
 const internKey = "Paid/Unpaid\n Interns";
 
@@ -800,20 +802,74 @@ tbody.innerHTML=
 return;
 
 }
+function sortTable(column){
 
+    if(sortColumn === column){
+
+        sortDirection =
+        sortDirection === "asc" ? "desc" : "asc";
+
+    }else{
+
+        sortColumn = column;
+        sortDirection = "asc";
+
+    }
+
+    allData.sort((a,b)=>{
+
+        let x = (a[column] || "").toString().trim();
+        let y = (b[column] || "").toString().trim();
+if(column==="Salary package"){
+
+    x = parseFloat(x.replace(/[^\d.]/g,"")) || 0;
+    y = parseFloat(y.replace(/[^\d.]/g,"")) || 0;
+
+}
+        // Number sorting
+        if(!isNaN(parseFloat(x)) && !isNaN(parseFloat(y))){
+
+            x = parseFloat(x);
+            y = parseFloat(y);
+
+            return sortDirection==="asc"
+                ? x-y
+                : y-x;
+
+        }
+
+        // Text sorting
+        return sortDirection==="asc"
+            ? x.localeCompare(y)
+            : y.localeCompare(x);
+
+    });
+
+    applyFilters();
+
+}
 let headers=Object.keys(data[0]);
 
 let tr=document.createElement("tr");
 
 /* HEADERS */
 
-headers.forEach(h=>{
+headers.forEach(h => {
 
-let th=document.createElement("th");
+    let th = document.createElement("th");
 
-th.innerText=h;
+    let arrow = "";
 
-tr.appendChild(th);
+    if (sortColumn === h) {
+        arrow = sortDirection === "asc" ? " ▲" : " ▼";
+    }
+
+    th.innerHTML = h + arrow;
+    th.style.cursor = "pointer";
+
+    th.onclick = () => sortTable(h);
+
+    tr.appendChild(th);
 
 });
 
