@@ -493,7 +493,79 @@ min-width:1400px;
 }
 
 }
+.dashboard{
 
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+gap:15px;
+
+margin:15px 0;
+
+}
+
+.card{
+
+padding:18px;
+
+border-radius:18px;
+
+text-align:center;
+
+color:#fff;
+
+backdrop-filter:blur(12px);
+
+transition:.35s;
+
+box-shadow:0 8px 20px rgba(0,0,0,.3);
+
+}
+
+.card:hover{
+
+transform:translateY(-6px) scale(1.03);
+
+}
+
+.card h2{
+
+font-size:16px;
+
+margin-bottom:10px;
+
+}
+
+.card h1{
+
+font-size:32px;
+
+}
+
+.offers{
+background:linear-gradient(135deg,#00c6ff,#0072ff);
+}
+
+.students{
+background:linear-gradient(135deg,#00b09b,#96c93d);
+}
+
+.companies{
+background:linear-gradient(135deg,#ff512f,#dd2476);
+}
+
+.highest{
+background:linear-gradient(135deg,#8e2de2,#4a00e0);
+}
+
+.average{
+background:linear-gradient(135deg,#f7971e,#ffd200);
+}
+
+.placement{
+background:linear-gradient(135deg,#11998e,#38ef7d);
+}
 </style>
 
 </head>
@@ -508,16 +580,36 @@ min-width:1400px;
 
 </div>
 
-<div class="stats">
+<div class="dashboard">
 
-<div>
-Total Offers :
-<span id="totalOffers">0</span>
+<div class="card offers">
+<h2>Total Offers</h2>
+<h1 id="totalOffers">0</h1>
 </div>
 
-<div>
-Total Placed Students :
-<span id="placedStudents">0</span>
+<div class="card students">
+<h2>Placed Students</h2>
+<h1 id="placedStudents">0</h1>
+</div>
+
+<div class="card companies">
+<h2>Companies</h2>
+<h1 id="companyCount">0</h1>
+</div>
+
+<div class="card highest">
+<h2>Highest Package</h2>
+<h1 id="highestPackage">0 LPA</h1>
+</div>
+
+<div class="card average">
+<h2>Average Package</h2>
+<h1 id="averagePackage">0 LPA</h1>
+</div>
+
+<div class="card placement">
+<h2>Placement %</h2>
+<h1 id="placementPercent">0%</h1>
 </div>
 
 </div>
@@ -850,23 +942,60 @@ uniqueStudents.size;
 
 /* APPLY FILTERS */
 
-function applyFilters(){
+function updateStats(data){
 
-let search=document.getElementById("search")
-.value.toLowerCase();
+document.getElementById("totalOffers").innerText=data.length;
 
-let batch=document.getElementById("batchFilter").value;
+let students=new Set();
 
-let branch=document.getElementById("branchFilter").value;
+let companies=new Set();
 
-let company=document.getElementById("companyFilter").value;
+let highest=0;
 
-let nature=document.getElementById("natureFilter").value;
+let total=0;
 
-let intern=document.getElementById("internFilter").value;
+let count=0;
 
-let gender=document.getElementById("genderFilter").value;
+data.forEach(r=>{
 
+students.add(r["Roll Number"]);
+
+if(r["Company Placed"])
+companies.add(r["Company Placed"]);
+
+let pkg=parseFloat(
+(r["Salary package"]||"0")
+.replace(/[^\d.]/g,"")
+);
+
+if(!isNaN(pkg)&&pkg>0){
+
+total+=pkg;
+
+count++;
+
+if(pkg>highest)
+highest=pkg;
+
+}
+
+});
+
+document.getElementById("placedStudents").innerText=students.size;
+
+document.getElementById("companyCount").innerText=companies.size;
+
+document.getElementById("highestPackage").innerText=highest+" LPA";
+
+document.getElementById("averagePackage").innerText=
+(count?(total/count).toFixed(2):0)+" LPA";
+
+let percent=((students.size/data.length)*100).toFixed(1);
+
+document.getElementById("placementPercent").innerText=
+percent+"%";
+
+}
 /* FILTER */
 
 let filtered=allData.filter(row=>{
