@@ -566,6 +566,81 @@ background:linear-gradient(135deg,#f7971e,#ffd200);
 .placement{
 background:linear-gradient(135deg,#11998e,#38ef7d);
 }
+ .controls{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+
+gap:12px;
+
+margin:20px 0;
+
+padding:18px;
+
+background:rgba(255,255,255,.08);
+
+backdrop-filter:blur(15px);
+
+border-radius:18px;
+
+box-shadow:0 8px 25px rgba(0,0,0,.25);
+
+}
+
+.controls input,
+.controls select{
+
+height:42px;
+
+border:none;
+
+border-radius:12px;
+
+padding:0 12px;
+
+font-size:14px;
+
+background:white;
+
+transition:.3s;
+
+}
+
+.controls input:focus,
+.controls select:focus{
+
+transform:scale(1.03);
+
+box-shadow:0 0 12px #00c6ff;
+
+}
+
+#resetFilters{
+
+height:42px;
+
+border:none;
+
+border-radius:12px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+background:linear-gradient(135deg,#ff512f,#dd2476);
+
+color:white;
+
+transition:.3s;
+
+}
+
+#resetFilters:hover{
+
+transform:scale(1.05);
+
+}
 </style>
 
 </head>
@@ -616,31 +691,46 @@ background:linear-gradient(135deg,#11998e,#38ef7d);
 
 <div class="controls">
 
-<input type="text" id="search" placeholder="Search student / roll / company">
+<input type="text" id="search" placeholder="🔍 Search Student / Roll / Company">
 
 <select id="batchFilter">
-<option value="">All Batches</option>
+<option value="">🎓 All Batches</option>
 </select>
 
 <select id="branchFilter">
-<option value="">All Branches</option>
+<option value="">🏛️ All Branches</option>
 </select>
 
 <select id="companyFilter">
-<option value="">All Companies</option>
+<option value="">🏢 All Companies</option>
 </select>
 
 <select id="natureFilter">
-<option value="">Nature of the Company</option>
+<option value="">💼 Company Nature</option>
 </select>
 
 <select id="internFilter">
-<option value="">Internship Type</option>
+<option value="">📄 Internship Type</option>
 </select>
 
 <select id="genderFilter">
-<option value="">All Genders</option>
+<option value="">👤 Gender</option>
 </select>
+
+<select id="campusFilter">
+<option value="">🌍 Campus Type</option>
+<option>On Campus</option>
+<option>Off Campus</option>
+</select>
+
+<input
+type="number"
+id="salaryFilter"
+placeholder="💰 Minimum Package">
+
+<button id="resetFilters">
+Reset
+</button>
 
 </div>
 
@@ -998,9 +1088,33 @@ percent+"%";
 }
 /* FILTER */
 
+function applyFilters(){
+
+let search=document.getElementById("search").value.toLowerCase();
+
+let batch=document.getElementById("batchFilter").value;
+
+let branch=document.getElementById("branchFilter").value;
+
+let company=document.getElementById("companyFilter").value;
+
+let nature=document.getElementById("natureFilter").value;
+
+let intern=document.getElementById("internFilter").value;
+
+let gender=document.getElementById("genderFilter").value;
+
+let campus=document.getElementById("campusFilter").value;
+
+let minSalary=parseFloat(document.getElementById("salaryFilter").value)||0;
+
 let filtered=allData.filter(row=>{
 
 let text=JSON.stringify(row).toLowerCase();
+
+let salary=parseFloat((row["Salary package"]||"0").replace(/[^\d.]/g,""))||0;
+
+let campusValue=(row["On Campus/Off Campus"]||row["On Campus / Off Campus"]||"").trim();
 
 return text.includes(search)
 
@@ -1010,25 +1124,25 @@ return text.includes(search)
 
 && (company==="" || row["Company Placed"]===company)
 
-&& (nature==="" ||
-(row[natureKey] || "").trim()===nature)
+&& (nature==="" || (row[natureKey]||"").trim()===nature)
 
-&& (intern==="" ||
-(row[internKey] || "").trim()===intern)
+&& (intern==="" || (row[internKey]||"").trim()===intern)
 
-&& (gender==="" ||
-(row["Gender"] || "").trim()===gender);
+&& (gender==="" || (row["Gender"]||"").trim()===gender)
+
+&& (campus==="" || campusValue===campus)
+
+&& (salary>=minSalary);
 
 });
 
 updateCompanyFilter(filtered);
- 
+
 buildTable(filtered);
 
 updateStats(filtered);
 
 }
-
 /* EVENTS */
 
 document.getElementById("search")
