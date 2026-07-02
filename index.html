@@ -769,8 +769,9 @@ fetch(csvURL)
       complete: function(results) {
         allData = results.data;
         buildTable(allData);
-        populateFilters(allData);
-        updateStats(allData);
+populateFilters(allData);
+updateStats(allData);
+applyFilters();
       }
     });
   })
@@ -1013,22 +1014,6 @@ companySelect.value = currentValue;
 
 /* UPDATE STATS */
 
-function updateStats(data){
-
-document.getElementById("totalOffers").innerText=data.length;
-
-let uniqueStudents=new Set();
-
-data.forEach(row=>{
-
-uniqueStudents.add(row["Roll Number"]);
-
-});
-
-document.getElementById("placedStudents").innerText=
-uniqueStudents.size;
-
-}
 
 /* APPLY FILTERS */
 
@@ -1080,7 +1065,8 @@ document.getElementById("highestPackage").innerText=highest+" LPA";
 document.getElementById("averagePackage").innerText=
 (count?(total/count).toFixed(2):0)+" LPA";
 
-let percent=((students.size/data.length)*100).toFixed(1);
+let totalStudents = allData.length || 1;
+let percent = ((students.size / totalStudents) * 100).toFixed(1);
 
 document.getElementById("placementPercent").innerText=
 percent+"%";
@@ -1114,8 +1100,19 @@ let text=JSON.stringify(row).toLowerCase();
 
 let salary=parseFloat((row["Salary package"]||"0").replace(/[^\d.]/g,""))||0;
 
-let campusValue=(row["On Campus/Off Campus"]||row["On Campus / Off Campus"]||"").trim();
+let campusValue = "";
 
+Object.keys(row).forEach(key=>{
+
+if(key.includes("On Campus")){
+
+campusValue = row[key] || "";
+
+}
+
+});
+
+campusValue = campusValue.trim();
 return text.includes(search)
 
 && (batch==="" || row["Batch"]===batch)
@@ -1165,7 +1162,24 @@ document.getElementById("internFilter")
 
 document.getElementById("genderFilter")
 .addEventListener("change",applyFilters);
+document.getElementById("salaryFilter")
+.addEventListener("keyup", applyFilters);
 
+document.getElementById("campusFilter")
+.addEventListener("change", applyFilters);
+
+document.getElementById("resetFilters")
+.addEventListener("click", () => {
+
+    document.querySelectorAll(".controls input")
+    .forEach(i => i.value = "");
+
+    document.querySelectorAll(".controls select")
+    .forEach(s => s.selectedIndex = 0);
+
+    applyFilters();
+
+});
 </script>
 
 </body>
