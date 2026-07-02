@@ -1167,17 +1167,21 @@ document.getElementById("salaryFilter")
 
 document.getElementById("campusFilter")
 .addEventListener("change", applyFilters);
+document.getElementById("resetFilters").addEventListener("click", function () {
 
-document.getElementById("resetFilters")
-.addEventListener("click", () => {
+    document.getElementById("search").value = "";
+    document.getElementById("batchFilter").value = "";
+    document.getElementById("branchFilter").value = "";
+    document.getElementById("companyFilter").value = "";
+    document.getElementById("natureFilter").value = "";
+    document.getElementById("internFilter").value = "";
+    document.getElementById("genderFilter").value = "";
+    document.getElementById("campusFilter").value = "";
+    document.getElementById("salaryFilter").value = "";
 
-    document.querySelectorAll(".controls input")
-    .forEach(i => i.value = "");
-
-    document.querySelectorAll(".controls select")
-    .forEach(s => s.selectedIndex = 0);
-
-    applyFilters();
+    buildTable(allData);
+    populateFilters(allData);
+    updateStats(allData);
 
 });
 </script>
