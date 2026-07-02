@@ -641,6 +641,31 @@ transition:.3s;
 transform:scale(1.05);
 
 }
+ #exportExcel{
+
+height:42px;
+
+border:none;
+
+border-radius:12px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+background:linear-gradient(135deg,#16a34a,#22c55e);
+
+color:white;
+
+transition:.3s;
+
+}
+
+#exportExcel:hover{
+
+transform:scale(1.05);
+
+}
 </style>
 
 </head>
@@ -728,8 +753,10 @@ type="number"
 id="salaryFilter"
 placeholder="💰 Minimum Package">
 
-<button id="resetFilters">
-Reset
+<button id="resetFilters">Reset</button>
+
+<button id="exportExcel">
+📥 Export Excel
 </button>
 
 </div>
@@ -747,6 +774,7 @@ Reset
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <script>
 
@@ -1165,7 +1193,57 @@ if(key.includes("On Campus")){
 campusValue = row[key] || "";
 
 }
+function exportFilteredData(){
 
+    let search=document.getElementById("search").value.toLowerCase();
+    let batch=document.getElementById("batchFilter").value;
+    let branch=document.getElementById("branchFilter").value;
+    let company=document.getElementById("companyFilter").value;
+    let nature=document.getElementById("natureFilter").value;
+    let intern=document.getElementById("internFilter").value;
+    let gender=document.getElementById("genderFilter").value;
+    let campus=document.getElementById("campusFilter").value;
+    let minSalary=parseFloat(document.getElementById("salaryFilter").value)||0;
+
+    let filtered = allData.filter(row=>{
+
+        let text = JSON.stringify(row).toLowerCase();
+
+        let salary=parseFloat((row["Salary package"]||"0").replace(/[^\d.]/g,""))||0;
+
+        let campusValue="";
+
+        Object.keys(row).forEach(key=>{
+
+            if(key.includes("On Campus")){
+                campusValue=row[key]||"";
+            }
+
+        });
+
+        campusValue=campusValue.trim();
+
+        return text.includes(search)
+        && (batch==="" || row["Batch"]===batch)
+        && (branch==="" || row["Branch"]===branch)
+        && (company==="" || row["Company Placed"]===company)
+        && (nature==="" || (row[natureKey]||"").trim()===nature)
+        && (intern==="" || (row[internKey]||"").trim()===intern)
+        && (gender==="" || (row["Gender"]||"").trim()===gender)
+        && (campus==="" || campusValue===campus)
+        && (salary>=minSalary);
+
+    });
+
+    const wb = XLSX.utils.book_new();
+
+    const ws = XLSX.utils.json_to_sheet(filtered);
+
+    XLSX.utils.book_append_sheet(wb,ws,"Placements");
+
+    XLSX.writeFile(wb,"MGIT_Placements.xlsx");
+
+}
 });
 
 campusValue = campusValue.trim();
@@ -1223,6 +1301,8 @@ document.getElementById("salaryFilter")
 
 document.getElementById("campusFilter")
 .addEventListener("change", applyFilters);
+ document.getElementById("exportExcel")
+.addEventListener("click",exportFilteredData);
 document.getElementById("resetFilters").addEventListener("click", function () {
 
     document.getElementById("search").value = "";
